@@ -99,4 +99,98 @@ class ElevatorOutsideRequestView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ElevatorInsideRequestView(APIView):
 
+    serializer_class = ElevatorRequestSerializer
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def post(self, request):
+        
+        serializer = ElevatorRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            building_id = serializer.validated_data['building_id']
+            destination_floor = serializer.validated_data['destination_floor']
+            elevator_id = serializer.validated_data['elevator_id']
+            try:
+                building_obj = Building.objects.get(id=building_id)
+            except Building.DoesNotExist:
+                return Response("Building not found", status=404)
+            if destination_floor > building_obj.totalfloors: 
+                return Response("Destination floor should be less than max floor", status=status.HTTP_400_BAD_REQUEST)
+
+            if destination_floor < building_obj.minimumfloors: 
+                return Response("Destination floor should be less than min floor", status=status.HTTP_400_BAD_REQUEST)
+            try:
+                elevator_obj = Elevator.objects.get(id=elevator_id)
+            except Elevator.DoesNotExist:
+                return Response("Elevator not found", status=404)
+            if elevator_obj:
+                
+                if elevator_obj.id not in elevators:
+                    elevators[elevator_obj.id] = ElevatorController(
+                        elevator_id=elevator_obj.id, initial_floor=elevator_obj.current_floor, building_id=building_id, min=building_obj.minimumfloors, max=building_obj.totalfloors)
+                elevator = elevators[elevator_obj.id]
+                request = ElevatorRequest(destination_floor=destination_floor)
+                request.save()
+                elevator.add_request(request)
+                
+                if not elevator.is_alive():
+                    elevator.start()
+                return Response("Request sent successfully", status=200)
+            
+            else:
+                return Response("No elevator found", status=400)
+        
+        else:
+            return Response(serializer.errors, status=400)
+
+
+class ElevatorStatus(APIView):
+
+    serializer_class = ElevatorStatusSerializer
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+       
+
+    def post(self, request):
+        serializer = ElevatorStatusSerializer(data=request.data)
+        if serializer.is_valid():
+            elevator_id = serializer.validated_data['elevator_id']
+            try:
+                elevator_obj = Elevator.objects.get(id=elevator_id)
+            except Elevator.DoesNotExist:
+                return Response("Elevator not found", status=404)
+
+           
+                
+            is_running = False
+            
+            current_floor = elevator_obj.current_floor
+            is_door_open = elevator_obj.is_door_open
+            running_status = elevator_obj.running_status
+            is_running = elevator_obj.is_running
+            print("is_running",is_running)
+            elevator_status = {
+                    "current_floor": int(current_floor),
+                    "is_door_open": int(is_door_open),
+                    "running_status": running_status
+                }
+                
+
+            
+            message = "data fectch successfully"
+            data = {
+                "current_floor": current_floor,
+                "is_door_open": is_door_open,
+                "running_status": running_status,
+                "is_running": is_running
+            }
+            result = {
+                'data': data,
+                "message": message
+            }
+            return Response(result, status=200)
+        else:
+            return Response(serializer.errors, status=400)
