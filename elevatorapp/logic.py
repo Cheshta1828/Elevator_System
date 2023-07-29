@@ -22,16 +22,22 @@ class ElevatorController(threading.Thread):
         
         self.arr = [0] * (max-min+1)
 
-    def update_running_staus(self, elevator_status,):
+    def update_running_status(self, elevator_status,elevator):
         elevator_status["running_status"] = self.running_status
+        elevator.running_status=self.running_status
+        elevator.save()
         
 
-    def update_door(self, elevator_status,):
+    def update_door(self, elevator_status,elevator):
         elevator_status["is_door_open"] = int(self.is_door_open)
+        elevator.is_door_open=self.is_door_open
+        elevator.save()
        
 
-    def update_current_floor(self, elevator_status,):
+    def update_current_floor(self, elevator_status,elevator):
         elevator_status["current_floor"] = self.current_floor
+        elevator.current_floor=self.current_floor
+        elevator.save()
         
 
     def run(self):
@@ -61,43 +67,47 @@ class ElevatorController(threading.Thread):
                 elevator = Elevator.objects.get(id=self.elevator_id)
                 elevator.is_busy = True
                 elevator.running_status = self.running_status
+                print("is running",self.is_running)
                 elevator.save()
-                self.update_running_staus(elevator_status)
+                print("is running",self.is_running)
+                self.update_running_status(elevator_status,elevator)
                 elevator = Elevator.objects.get(id=self.elevator_id)
                 elevator.running_status = self.running_status
+                print("is running",self.is_running)
                 elevator.save()
                 while self.current_floor != request.destination_floor:
                     
                     if self.arr[self.current_floor - self.min] == 1:
                         print("door open")
                         self.is_door_open = True
-                        self.update_door(elevator_status)
+                        self.update_door(elevator_status,elevator)
                         time.sleep(2)
                         
                         self.is_door_open = False
-                        self.update_door(elevator_status)
+                        self.update_door(elevator_status,elevator)
                         self.arr[self.current_floor - self.min] = 0
                         print("door close")
                     
                     time.sleep(2)
                     self.current_floor += 1 if self.running_status == RunningStatus.GOING_UP.value else -1
-                    print(
-                        f"Elevator {self.elevator_id} is at floor {self.current_floor} and destination {request.destination_floor} .")
-                    self.update_current_floor(elevator_status)
+                    print(f"Elevator {self.elevator_id} is at floor {self.current_floor} and destination {request.destination_floor} .")
+                    self.update_current_floor(elevator_status,elevator)
 
                 self.arr[self.current_floor - self.min] = 0
                 self.running_status = RunningStatus.STANDING_STILL.value
-                self.update_running_staus(elevator_status)
+                self.update_running_status(elevator_status,elevator)
                 print("door open")
                 self.is_door_open = True
-                self.update_door(elevator_status)
+                self.update_door(elevator_status,elevator)
                 time.sleep(2)
                 self.is_door_open = False
-                self.update_door(elevator_status)
+                self.update_door(elevator_status,elevator)
                 print("door close")
                 elevator.current_floor = self.current_floor
                 elevator.running_status = self.running_status
+                print("is running",self.is_running)
                 elevator.is_busy = False
+                print(f"Elevator {self.elevator_id} is at floor {self.current_floor} and destination {request.destination_floor} .")
                 elevator.save()
                
                 request.delete()

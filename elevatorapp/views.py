@@ -137,10 +137,10 @@ class ElevatorInsideRequestView(APIView):
                 
                 if not elevator.is_alive():
                     elevator.start()
-                return Response("Request sent successfully", status=200)
+                return Response("Request sent ", status=200)
             
             else:
-                return Response("No elevator found", status=400)
+                return Response("Elevator does not exist", status=400)
         
         else:
             return Response(serializer.errors, status=400)
@@ -161,7 +161,7 @@ class ElevatorStatus(APIView):
             try:
                 elevator_obj = Elevator.objects.get(id=elevator_id)
             except Elevator.DoesNotExist:
-                return Response("Elevator not found", status=404)
+                return Response("Elevator does not exist", status=404)
 
            
                 
@@ -180,7 +180,7 @@ class ElevatorStatus(APIView):
                 
 
             
-            message = "data fectch successfully"
+            message = "data fetched"
             data = {
                 "current_floor": current_floor,
                 "is_door_open": is_door_open,
