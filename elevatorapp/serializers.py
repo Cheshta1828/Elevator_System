@@ -3,6 +3,7 @@ from .models import Building, Elevator, ElevatorRequest
 
 
 class BuildingSerializer(serializers.ModelSerializer):
+    """Serializer for building """
     
     class Meta:
         model = Building
@@ -10,6 +11,9 @@ class BuildingSerializer(serializers.ModelSerializer):
 
 
 class ElevatorSerializer(serializers.ModelSerializer):
+    """
+    Serializer for elevator status  
+    """
     
 
     class Meta:
@@ -18,6 +22,9 @@ class ElevatorSerializer(serializers.ModelSerializer):
 
 
 class ElevatorRequestSerializer(serializers.ModelSerializer):
+    """
+    Handling request inside elevator 
+    """
     
     class Meta:
         model = ElevatorRequest
@@ -27,14 +34,13 @@ class ElevatorRequestSerializer(serializers.ModelSerializer):
         )
 
 
-class ElevatorRequestSerializerAll(serializers.ModelSerializer):
-    
-    class Meta:
-        model = ElevatorRequest
-        fields = '__all__'
+
 
 
 class ElevatorRequestSerializer(serializers.Serializer):
+    """
+    Handling request inside elevator 
+    """
     
     elevator_id = serializers.IntegerField(required=True)
     building_id = serializers.IntegerField(required=True)
@@ -52,5 +58,8 @@ class ElevatorRequestOutsideSerializer(serializers.Serializer):
 
 
 class ElevatorStatusSerializer(serializers.Serializer):
+    """
+    Updating the status for elevator 
+    """
     
     elevator_id = serializers.IntegerField(required=True)

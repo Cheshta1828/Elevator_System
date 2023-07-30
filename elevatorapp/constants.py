@@ -1,8 +1,9 @@
 from enum import Enum
 class RunningStatus(Enum):
-    '''
-    Choices for running status of the elevator 
-    '''
+    """
+    Running status has 4 choices 
+    """
+    
     GOING_UP = 'going_up'
     STANDING_STILL = 'standing_still'
     GOING_DOWN = 'going_down'

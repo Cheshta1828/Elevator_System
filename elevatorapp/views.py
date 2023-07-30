@@ -2,7 +2,6 @@ from django.shortcuts import render
 from .models import Building ,Elevator
 from rest_framework import status
 from .logic import ElevatorController
-
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -70,31 +69,35 @@ class ElevatorOutsideRequestView(APIView):
             if user_destination_floor < building_obj.minimumfloors: 
                 return Response("Destination floor should be less than min floor", status=status.HTTP_400_BAD_REQUEST)
 
-            elevator =  Elevator.objects.filter(
+            elevator =  Elevator.objects.filter( #get all elevators which are operational
                 building_id=building_id).exclude(running_status=RunningStatus.NOT_WORKING.value)
             
-            user_elevator = -1
-            min_elevator_current_position = -1
-            min_distance = 1000 
-            for obj in elevator:
+            user_elevator = -1 #handling edge cases 
+            min_elevator_current_position = -1 #current position of elevator 
+            min_distance = 1000  #arbitary value assuming  cannot be more than 1000
+            for obj in elevator: #iterating over all elevators 
                 
-                current_floor = obj.current_floor
-                running_status =  obj.running_status
-                array_of_floors = None
+                current_floor = obj.current_floor #get the current floor 
+                running_status =  obj.running_status# get the running status  for each elevator 
+                array_of_floors = None 
                 if elevator:
-                        array_of_floors = elevator.get_array()
-               
+                        array_of_floors = elevator.get_array() #get the array of floors 
+                """
+                Calculating the most feasible and best suitable elevator by passing destnation floor with 
+                current floor of elevator 
+                """
                 current_lift_distance = get_floor_distance(user_destination_floor,int(current_floor),running_status,array_of_floors)
                 if current_lift_distance < min_distance:
                     user_elevator = obj.id
                     min_distance = current_lift_distance
                     min_elevator_current_position=current_floor
 
-            if  user_elevator !=- 1 :
-                elevator = elevators.get(user_elevator, None)
+            if  user_elevator !=- 1 : #if elevator exists and there is request for it 
+                elevator = elevators.get(user_elevator, None) #get that elevator 
                 if not elevator:
+                    """If not initiaised ,service is fed for particular elevator """
                     elevator = ElevatorController(elevator_id=user_elevator, initial_floor=int(min_elevator_current_position), building_id=building_id, min=building_obj.minimumfloors, max=building_obj.totalfloors)
-                    elevators[user_elevator] = elevator
+                    elevators[user_elevator] = elevator #update 
 
                 request = ElevatorRequest(destination_floor=user_destination_floor)
                 """ saving request in elevator request model 
@@ -102,7 +105,8 @@ class ElevatorOutsideRequestView(APIView):
                 request.save()
                 elevator.add_request(request)
 
-                if not elevator.is_alive():
+                if not elevator.is_alive(): 
+                    """if not alive call the start method which implicity call run method  """
                     elevator.start()
 
                 return Response("Request sent successfully", status=status.HTTP_200_OK)
