@@ -51,8 +51,8 @@ POST /elevator_status/: Get the status of a specific elevator. (Supply elevator_
 -------------------------------------------------------------------**Setup, Deploy, and Test**------------------------------------------------------------
 
 Clone the repository: git clone https://github.com/Cheshta1828/Elevator_System
-Install the required dependencies: cd elevator-control-system
-pip install -r requirements.txt
+Change directory: cd elevator-control-system
+Install the required dependencies: pip install -r requirements.txt
 Apply database migrations: python manage.py migrate
 Create a superuser for admin access: python manage.py createsuperuser
 Run the development server: python manage.py runserver
@@ -73,5 +73,5 @@ drf-spectacular: For API schema generation and documentation.
 
 -------------------------------------------------------------------**Conclusion**---------------------------------------------------------------
 
-This Elevator Control System API provides a simple and efficient way to manage buildings, elevators, and elevator requests. It follows a threaded approach to handle multiple elevator instances concurrently, providing real-time elevator management. Feel free to explore the API and use it as a base for your elevator control system. If you have any questions or need further assistance, please feel free to contact the project maintainers.
+This Elevator Control System API provides a simple and efficient way to manage buildings, elevators, and elevator requests. It follows a threaded approach to handle multiple elevator instances concurrently, providing real-time elevator management. Feel free to explore the API and use it as a base for your elevator control system. 
 
