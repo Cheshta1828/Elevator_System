@@ -42,6 +42,10 @@ class ElevatorRequestSerializer(serializers.Serializer):
 
 
 class ElevatorRequestOutsideSerializer(serializers.Serializer):
+    """
+    A person standing outside the building requesting for an elevator can only send information about building and 
+    the destination floor 
+    """
     
     building_id = serializers.IntegerField(required=True)
     destination_floor = serializers.IntegerField(required=True)

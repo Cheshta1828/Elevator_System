@@ -15,9 +15,15 @@ from .constants import RunningStatus
 
 # Create your views here.
 class BuildingView(viewsets.ModelViewSet):
-    print("in view")
+    """
+    Creating ,Updating ,Viewing and deleting the buildings
+
+    """
+    
+    
     
     def __init__(self, *args, **kwargs):
+
         super().__init__(*args, **kwargs)
         self.building = Building()
     
@@ -31,6 +37,10 @@ class BuildingView(viewsets.ModelViewSet):
             building_id=serializer.data['id']
         )
 class ElevatorView(viewsets.ModelViewSet):
+    """
+    Creating ,Updating ,Viewing the Elevators
+    
+    """
     
     queryset = Elevator.objects.all()
     serializer_class = ElevatorSerializer
@@ -44,10 +54,7 @@ class ElevatorOutsideRequestView(APIView):
         
 
     def post(self, request):
-        '''
-        function used when the user request for the Elevator from outside 
-        we calculated the elevator which is minimum distance from this floor
-        '''
+        
         serializer = ElevatorRequestOutsideSerializer(data=request.data)
         if serializer.is_valid():
             building_id = serializer.validated_data['building_id']
@@ -72,8 +79,12 @@ class ElevatorOutsideRequestView(APIView):
             for obj in elevator:
                 
                 current_floor = obj.current_floor
+                running_status =  obj.running_status
+                array_of_floors = None
+                if elevator:
+                        array_of_floors = elevator.get_array()
                
-                current_lift_distance = get_floor_distance(user_destination_floor,int(current_floor))
+                current_lift_distance = get_floor_distance(user_destination_floor,int(current_floor),running_status,array_of_floors)
                 if current_lift_distance < min_distance:
                     user_elevator = obj.id
                     min_distance = current_lift_distance
@@ -82,11 +93,12 @@ class ElevatorOutsideRequestView(APIView):
             if  user_elevator !=- 1 :
                 elevator = elevators.get(user_elevator, None)
                 if not elevator:
-                    elevator = ElevatorController(
-                        elevator_id=user_elevator, initial_floor=int(min_elevator_current_position), building_id=building_id, min=building_obj.minimumfloors, max=building_obj.totalfloors)
+                    elevator = ElevatorController(elevator_id=user_elevator, initial_floor=int(min_elevator_current_position), building_id=building_id, min=building_obj.minimumfloors, max=building_obj.totalfloors)
                     elevators[user_elevator] = elevator
 
                 request = ElevatorRequest(destination_floor=user_destination_floor)
+                """ saving request in elevator request model 
+                """
                 request.save()
                 elevator.add_request(request)
 

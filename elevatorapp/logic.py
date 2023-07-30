@@ -41,9 +41,11 @@ class ElevatorController(threading.Thread):
         
 
     def run(self):
+        print("i am run method")
         
         self.is_running = True
         while self.is_running:
+
             
             if not self.queue.empty():
                 request = self.queue.get()
@@ -91,6 +93,7 @@ class ElevatorController(threading.Thread):
                     time.sleep(2)
                     self.current_floor += 1 if self.running_status == RunningStatus.GOING_UP.value else -1
                     print(f"Elevator {self.elevator_id} is at floor {self.current_floor} and destination {request.destination_floor} .")
+                    print("is running",self.is_running)
                     self.update_current_floor(elevator_status,elevator)
 
                 self.arr[self.current_floor - self.min] = 0
@@ -108,6 +111,7 @@ class ElevatorController(threading.Thread):
                 print("is running",self.is_running)
                 elevator.is_busy = False
                 print(f"Elevator {self.elevator_id} is at floor {self.current_floor} and destination {request.destination_floor} .")
+                print("is runnning",self.is_running)
                 elevator.save()
                
                 request.delete()
