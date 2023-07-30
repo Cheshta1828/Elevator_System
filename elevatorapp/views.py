@@ -116,6 +116,9 @@ class ElevatorOutsideRequestView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ElevatorInsideRequestView(APIView):
+    """
+    handling requests inside the elevator 
+    """
 
     serializer_class = ElevatorRequestSerializer
     def __init__(self, *args, **kwargs):
@@ -142,15 +145,19 @@ class ElevatorInsideRequestView(APIView):
             except Elevator.DoesNotExist:
                 return Response("Elevator not found", status=404)
             if elevator_obj:
+                """already have the elevator w ejust need to operationalize it """
                 
                 if elevator_obj.id not in elevators:
+                    """"if not set the controller for this elevator """
                     elevators[elevator_obj.id] = ElevatorController(
                         elevator_id=elevator_obj.id, initial_floor=elevator_obj.current_floor, building_id=building_id, min=building_obj.minimumfloors, max=building_obj.totalfloors)
                 elevator = elevators[elevator_obj.id]
                 request = ElevatorRequest(destination_floor=destination_floor)
-                request.save()
+                """save in elevator request model"""
+                request.save() 
+                """add request to the queue for this elevator"""
                 elevator.add_request(request)
-                
+                """ if the elevator is not running make it by calling start mehtod which implicity calls run method"""
                 if not elevator.is_alive():
                     elevator.start()
                 return Response("Request sent ", status=200)
@@ -163,6 +170,7 @@ class ElevatorInsideRequestView(APIView):
 
 
 class ElevatorStatus(APIView):
+    """for getting the status of elevator """
 
     serializer_class = ElevatorStatusSerializer
 

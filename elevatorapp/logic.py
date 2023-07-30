@@ -22,7 +22,9 @@ class ElevatorController(threading.Thread):
         self.min = min
         
         self.arr = [0] * (max-min+1)
-    def get_array(self):
+        
+    def get_array(self): 
+        """ function for getting array of floors"""
         return self.arr
 
     def update_running_status(self, elevator_status,elevator):
